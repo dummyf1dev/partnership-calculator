@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partnership Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .breakdown {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .total-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .total-info h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .total-info .amount {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Partnership Calculator</h1>
+        <p class="subtitle">Supplier & Seller Profit Distribution</p>
+
+        <div class="input-group">
+            <label for="basePrice">Base Price (Rp)</label>
+            <input type="number" id="basePrice" placeholder="Enter base price" step="1" min="0">
+        </div>
+
+        <div class="input-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" id="quantity" placeholder="Enter quantity" step="1" min="1">
+        </div>
+
+        <div class="input-group">
+            <label for="realPrice">Real Price (Rp)</label>
+            <input type="number" id="realPrice" placeholder="Enter real selling price" step="1" min="0">
+        </div>
+
+        <button onclick="calculate()">Calculate Distribution</button>
+
+        <div class="results" id="results">
+            <div class="result-card">
+                <h3>Supplier (You)</h3>
+                <div class="amount" id="supplierAmount">$0.00</div>
+                <div class="breakdown" id="supplierBreakdown"></div>
+            </div>
+
+            <div class="result-card">
+                <h3>Seller (Partner)</h3>
+                <div class="amount" id="sellerAmount">$0.00</div>
+                <div class="breakdown" id="sellerBreakdown"></div>
+            </div>
+
+            <div class="total-info">
+                <h3>Total Revenue</h3>
+                <div class="amount" id="totalAmount">$0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const basePrice = parseFloat(document.getElementById('basePrice').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const realPrice = parseFloat(document.getElementById('realPrice').value);
+
+            if (isNaN(basePrice) || isNaN(quantity) || isNaN(realPrice)) {
+                alert('Please fill in all fields with valid numbers');
+                return;
+            }
+
+            if (basePrice <= 0 || quantity <= 0 || realPrice <= 0) {
+                alert('All values must be greater than zero');
+                return;
+            }
+
+            let supplierShare, sellerShare;
+            let supplierBreakdown, sellerBreakdown;
+
+            const totalRevenue = realPrice * quantity;
+
+            if (realPrice <= basePrice) {
+                // Scenario 1: real price <= base price
+                supplierShare = realPrice * 0.8 * quantity;
+                sellerShare = realPrice * 0.2 * quantity;
+                
+                supplierBreakdown = `80% of $${realPrice.toFixed(2)} × ${quantity} units`;
+                sellerBreakdown = `20% of $${realPrice.toFixed(2)} × ${quantity} units`;
+            } else {
+                // Scenario 2: real price > base price
+                const excess = realPrice - basePrice;
+                
+                const supplierBase = basePrice * 0.8;
+                const supplierExcess = excess * 0.4;
+                supplierShare = (supplierBase + supplierExcess) * quantity;
+                
+                const sellerBase = basePrice * 0.2;
+                const sellerExcess = excess * 0.6;
+                sellerShare = (sellerBase + sellerExcess) * quantity;
+                
+                supplierBreakdown = `(80% of $${basePrice.toFixed(2)} + 40% of $${excess.toFixed(2)}) × ${quantity} units`;
+                sellerBreakdown = `(20% of $${basePrice.toFixed(2)} + 60% of $${excess.toFixed(2)}) × ${quantity} units`;
+            }
+
+            document.getElementById('supplierAmount').textContent = `$${supplierShare.toFixed(2)}`;
+            document.getElementById('sellerAmount').textContent = `$${sellerShare.toFixed(2)}`;
+            document.getElementById('supplierBreakdown').textContent = supplierBreakdown;
+            document.getElementById('sellerBreakdown').textContent = sellerBreakdown;
+            document.getElementById('totalAmount').textContent = `$${totalRevenue.toFixed(2)}`;
+            
+            document.getElementById('results').classList.add('show');
+        }
+
+        // Allow Enter key to calculate
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+    </script>
+</body>
+</html>
