@@ -157,17 +157,17 @@
 
         <div class="input-group">
             <label for="basePrice">Base Price (Rp)</label>
-            <input type="number" id="basePrice" placeholder="Enter base price" step="1" min="0">
+            <input type="number" id="basePrice" placeholder="Masukkan harga dasar" step="1" min="0">
         </div>
 
         <div class="input-group">
             <label for="quantity">Quantity</label>
-            <input type="number" id="quantity" placeholder="Enter quantity" step="1" min="1">
+            <input type="number" id="quantity" placeholder="Masukkan jumlah" step="1" min="1">
         </div>
 
         <div class="input-group">
             <label for="realPrice">Real Price (Rp)</label>
-            <input type="number" id="realPrice" placeholder="Enter real selling price" step="1" min="0">
+            <input type="number" id="realPrice" placeholder="Masukkan harga jual" step="1" min="0">
         </div>
 
         <button onclick="calculate()">Calculate Distribution</button>
@@ -175,36 +175,40 @@
         <div class="results" id="results">
             <div class="result-card">
                 <h3>Supplier (You)</h3>
-                <div class="amount" id="supplierAmount">$0.00</div>
+                <div class="amount" id="supplierAmount">Rp 0</div>
                 <div class="breakdown" id="supplierBreakdown"></div>
             </div>
 
             <div class="result-card">
                 <h3>Seller (Partner)</h3>
-                <div class="amount" id="sellerAmount">$0.00</div>
+                <div class="amount" id="sellerAmount">Rp 0</div>
                 <div class="breakdown" id="sellerBreakdown"></div>
             </div>
 
             <div class="total-info">
                 <h3>Total Revenue</h3>
-                <div class="amount" id="totalAmount">$0.00</div>
+                <div class="amount" id="totalAmount">Rp 0</div>
             </div>
         </div>
     </div>
 
     <script>
+        function formatRupiah(amount) {
+            return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+        }
+
         function calculate() {
             const basePrice = parseFloat(document.getElementById('basePrice').value);
             const quantity = parseInt(document.getElementById('quantity').value);
             const realPrice = parseFloat(document.getElementById('realPrice').value);
 
             if (isNaN(basePrice) || isNaN(quantity) || isNaN(realPrice)) {
-                alert('Please fill in all fields with valid numbers');
+                alert('Mohon isi semua kolom dengan angka yang valid');
                 return;
             }
 
             if (basePrice <= 0 || quantity <= 0 || realPrice <= 0) {
-                alert('All values must be greater than zero');
+                alert('Semua nilai harus lebih besar dari nol');
                 return;
             }
 
@@ -218,8 +222,8 @@
                 supplierShare = realPrice * 0.8 * quantity;
                 sellerShare = realPrice * 0.2 * quantity;
                 
-                supplierBreakdown = `80% of $${realPrice.toFixed(2)} × ${quantity} units`;
-                sellerBreakdown = `20% of $${realPrice.toFixed(2)} × ${quantity} units`;
+                supplierBreakdown = `80% dari ${formatRupiah(realPrice)} × ${quantity} unit`;
+                sellerBreakdown = `20% dari ${formatRupiah(realPrice)} × ${quantity} unit`;
             } else {
                 // Scenario 2: real price > base price
                 const excess = realPrice - basePrice;
@@ -232,15 +236,15 @@
                 const sellerExcess = excess * 0.6;
                 sellerShare = (sellerBase + sellerExcess) * quantity;
                 
-                supplierBreakdown = `(80% of $${basePrice.toFixed(2)} + 40% of $${excess.toFixed(2)}) × ${quantity} units`;
-                sellerBreakdown = `(20% of $${basePrice.toFixed(2)} + 60% of $${excess.toFixed(2)}) × ${quantity} units`;
+                supplierBreakdown = `(80% dari ${formatRupiah(basePrice)} + 40% dari ${formatRupiah(excess)}) × ${quantity} unit`;
+                sellerBreakdown = `(20% dari ${formatRupiah(basePrice)} + 60% dari ${formatRupiah(excess)}) × ${quantity} unit`;
             }
 
-            document.getElementById('supplierAmount').textContent = `$${supplierShare.toFixed(2)}`;
-            document.getElementById('sellerAmount').textContent = `$${sellerShare.toFixed(2)}`;
+            document.getElementById('supplierAmount').textContent = formatRupiah(supplierShare);
+            document.getElementById('sellerAmount').textContent = formatRupiah(sellerShare);
             document.getElementById('supplierBreakdown').textContent = supplierBreakdown;
             document.getElementById('sellerBreakdown').textContent = sellerBreakdown;
-            document.getElementById('totalAmount').textContent = `$${totalRevenue.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = formatRupiah(totalRevenue);
             
             document.getElementById('results').classList.add('show');
         }
